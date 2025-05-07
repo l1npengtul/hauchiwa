@@ -311,6 +311,7 @@ fn css_compile(file: PathBuf) -> Result<InputItem, StylesheetError> {
 
 fn load_scripts(entrypoints: &HashMap<&str, &str>) -> Vec<InputItem> {
     let path_scripts = Utf8Path::new(".cache/scripts/");
+    fs::create_dir_all(path_scripts).expect("Failed to create directory paths");
     let s = Instant::now();
     let session = Session::new();
     let mut file_read = Vec::with_capacity(10000);

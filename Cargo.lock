@@ -230,7 +230,7 @@ checksum = "a79f646ae2c733203944224b9c1277d5a8653f4ab42ab28ed2bbd7d618a895e8"
 dependencies = [
  "aho-corasick 1.1.3",
  "lazy_static",
- "parse-js 0.21.0",
+ "parse-js",
 ]
 
 [[package]]
@@ -885,7 +885,6 @@ dependencies = [
  "image",
  "indicatif",
  "lightningcss",
- "minify-html",
  "notify",
  "notify-debouncer-full",
  "rayon",
@@ -1335,47 +1334,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "minify-html"
-version = "0.16.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0df760078ad1daa3e9a37629e1a5aa50ec0429ed512e567f18a1b5ec54cbbd5"
-dependencies = [
- "ahash 0.8.11",
- "aho-corasick 0.7.20",
- "lightningcss",
- "memchr",
- "minify-html-common",
- "minify-js",
- "once_cell",
-]
-
-[[package]]
-name = "minify-html-common"
-version = "0.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "697a6b40dffdc5de10c0cbd709dc2bc2039cea9dab8aaa636eb9a49d6b411780"
-dependencies = [
- "aho-corasick 0.7.20",
- "itertools 0.12.1",
- "lazy_static",
- "memchr",
- "rustc-hash 1.1.0",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "minify-js"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1fa5546ee8bd66024113e506cabe4230e76635a094c06ea2051b66021dda92e"
-dependencies = [
- "aho-corasick 0.7.20",
- "lazy_static",
- "parse-js 0.20.1",
-]
-
-[[package]]
 name = "minimal-lexical"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1552,7 +1510,7 @@ dependencies = [
  "phf",
  "phf_codegen",
  "precomputed-hash",
- "rustc-hash 2.1.1",
+ "rustc-hash",
  "smallvec",
 ]
 
@@ -1581,19 +1539,6 @@ dependencies = [
  "redox_syscall",
  "smallvec",
  "windows-targets",
-]
-
-[[package]]
-name = "parse-js"
-version = "0.20.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2742b5e32dcb5930447ed9f9e401a7dfd883867fc079c4fac44ae8ba3593710e"
-dependencies = [
- "aho-corasick 0.7.20",
- "bumpalo",
- "hashbrown 0.13.2",
- "lazy_static",
- "memchr",
 ]
 
 [[package]]
@@ -1997,12 +1942,6 @@ name = "rustc-demangle"
 version = "0.1.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "719b953e2095829ee67db738b3bfa9fa368c94900df327b3f07fe6e794d2fe1f"
-
-[[package]]
-name = "rustc-hash"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
 
 [[package]]
 name = "rustc-hash"

@@ -24,7 +24,6 @@ serde                   = { version = "1.0", features = ["derive"] }
 sha2                    = "0.10"
 sitemap-rs              = "0.3"
 better-minify-js = "0.7.0"
-minify-html = "0.16.4"
 lightningcss = "1.0.0-alpha.65"
 # CLI
 console                 = { version = "0.15", default-features = false }

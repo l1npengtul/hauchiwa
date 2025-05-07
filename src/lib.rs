@@ -9,12 +9,13 @@ use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 use std::fmt::Debug;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 use std::rc::Rc;
 use std::sync::{Arc, LazyLock, RwLock};
 use std::time::Instant;
 use std::{fs, mem};
-
+use std::fs::File;
+use std::io::{Read, Write};
+use better_minify_js::{Session, TopLevelMode};
 use camino::{Utf8Path, Utf8PathBuf};
 use console::style;
 use gray_matter::Matter;
@@ -309,22 +310,21 @@ fn css_compile(file: PathBuf) -> Result<InputItem, StylesheetError> {
 }
 
 fn load_scripts(entrypoints: &HashMap<&str, &str>) -> Vec<InputItem> {
-    let mut cmd = Command::new("esbuild");
-
-    for (alias, path) in entrypoints.iter() {
-        cmd.arg(format!("{}={}", alias, path));
-    }
-
     let path_scripts = Utf8Path::new(".cache/scripts/");
-
     let s = Instant::now();
-    let _ = cmd
-        .arg("--format=esm")
-        .arg("--bundle")
-        .arg("--minify")
-        .arg(format!("--outdir={}", path_scripts))
-        .output()
-        .unwrap();
+    let session = Session::new();
+    let mut file_read = Vec::with_capacity(10000);
+    let mut file_write = Vec::with_capacity(10000);
+
+    entrypoints.iter().for_each(|(alias, path)| {
+        let mut file = File::open(path).expect("Failed to load scirpt");
+        file.read_to_end(&mut file_read).expect("Failed to read file to backing memory");
+        let mut out_file = File::create(path_scripts.join(alias).with_extension("js")).expect("Failed to create output js file");
+        better_minify_js::minify(&session, TopLevelMode::Module, &file_read, &mut file_write).expect("Failed to minify JS");
+        out_file.write_all(&file_write).expect("Failed to write to output js file");
+        file_read.clear();
+        file_write.clear();
+    });
 
     eprintln!("Loaded global JS scripts! {}", crate::io::as_overhead(s));
 

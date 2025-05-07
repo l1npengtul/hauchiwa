@@ -290,12 +290,13 @@ fn css_load_paths(paths: &[Utf8PathBuf]) -> Result<Vec<InputItem>, StylesheetErr
 
         for css in css_results {
             let mut css_file = String::new();
-            File::open(css.clone()?).expect("Failed to open CSS File").read_to_string(&mut css_file).expect("Failed to read CSS File");
+            let utf8path = Utf8PathBuf::try_from(css?).map_err(|e| StylesheetError::InvalidFileName(e.to_string()))?;
+            File::open(&utf8path).expect("Failed to open CSS File").read_to_string(&mut css_file).expect("Failed to read CSS File");
             let optimized = optimize_css(&css_file);
             let item = InputItem {
                 hash: Sha256::digest(&optimized).into(),
-                file: css.clone()?.into(),
-                slug: Utf8PathBuf::try_from(css?).map_err(|e| StylesheetError::InvalidFileName(e.to_string()))?,
+                file: utf8path.clone(),
+                slug: utf8path,
                 data: Input::Stylesheet(InputStylesheet { stylesheet: optimized }),
                 info: None,
             };

@@ -21,6 +21,8 @@ use console::style;
 use gray_matter::Matter;
 use gray_matter::engine::{JSON, YAML};
 use indicatif::{ParallelProgressIterator, ProgressBar, ProgressIterator, ProgressStyle};
+use lightningcss::printer::PrinterOptions;
+use lightningcss::stylesheet::{MinifyOptions, ParserOptions, StyleSheet};
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
@@ -275,11 +277,29 @@ fn css_load_paths(paths: &[Utf8PathBuf]) -> Result<Vec<InputItem>, StylesheetErr
     let mut items = Vec::new();
 
     for path in paths {
-        let pattern = path.join("**/[!_]*.scss");
-        let results = glob::glob(pattern.as_str())?;
+        let scss_pattern = path.join("**/[!_]*.scss");
+        let scss_results = glob::glob(scss_pattern.as_str())?;
 
-        for path in results {
+        for path in scss_results {
             let item = css_compile(path?)?;
+            items.push(item);
+        }
+
+        let css_pattern = path.join("**/[!_]*.css");
+        let css_results = glob::glob(css_pattern.as_str())?;
+
+        for css in css_results {
+            let mut css_file = String::new();
+            File::open(css.clone()?).expect("Failed to open CSS File").read_to_string(&mut css_file).expect("Failed to read CSS File");
+            let optimized = optimize_css(&css_file);
+            let item = InputItem {
+                hash: Sha256::digest(&optimized).into(),
+                file: css.clone()?.into(),
+                slug: Utf8PathBuf::try_from(css?).map_err(|e| StylesheetError::InvalidFileName(e.to_string()))?,
+                data: Input::Stylesheet(InputStylesheet { stylesheet: optimized }),
+                info: None,
+            };
+
             items.push(item);
         }
     }
@@ -297,8 +317,9 @@ fn css_compile(file: PathBuf) -> Result<InputItem, StylesheetError> {
 
     let file =
         Utf8PathBuf::try_from(file).map_err(|e| StylesheetError::InvalidFileName(e.to_string()))?;
-    let stylesheet =
+    let scss_stylesheet =
         grass::from_path(&file, &opts).map_err(|e| StylesheetError::Compiler(e.to_string()))?;
+    let stylesheet = optimize_css(&scss_stylesheet);
 
     Ok(InputItem {
         hash: Sha256::digest(&stylesheet).into(),
@@ -307,6 +328,12 @@ fn css_compile(file: PathBuf) -> Result<InputItem, StylesheetError> {
         data: Input::Stylesheet(InputStylesheet { stylesheet }),
         info: None,
     })
+}
+
+fn optimize_css(css: &str) -> String {
+    let mut css_stylesheet = StyleSheet::parse(css, ParserOptions::default()).expect("Failed to parse CSS");
+    css_stylesheet.minify(MinifyOptions::default()).expect("Failed to minify CSS");
+    css_stylesheet.to_css(PrinterOptions::default()).expect("Failed to serialize CSS").code
 }
 
 fn load_scripts(entrypoints: &HashMap<&str, &str>) -> Vec<InputItem> {
